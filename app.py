@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from backend.auth.auth_utils import get_authenticated_user_details
 from backend.history.cosmosdbservice import CosmosConversationClient
+from backend.TextFeature.SendText import 
 
 load_dotenv()
 
