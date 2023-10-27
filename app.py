@@ -6,10 +6,12 @@ import openai
 from azure.identity import DefaultAzureCredential
 from flask import Flask, Response, request, jsonify, send_from_directory
 from dotenv import load_dotenv
+import re
 
 from backend.auth.auth_utils import get_authenticated_user_details
 from backend.history.cosmosdbservice import CosmosConversationClient
 from backend.TextFeature.SendText import send_sms_via_email
+from backend.TextFeature.ValidatePhoneNumber import contains_phone_number
 
 load_dotenv()
 
@@ -150,14 +152,14 @@ def generateFilterString(userToken):
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
 
-    if request_messages.get("text").search(r'^(?:\D*\d){9}'):
-        PHONE_NUMBER = request_messages.get("text")
+    #if request_messages.get("text").search(r'^(?:\D*\d){9}'):
+    #    PHONE_NUMBER = request_messages.get("text")
 
-    phone_providers= {"Verizon", "Xfinity Mobile", "AT&T", "date"} 
-    if request_messages.get("text") in phone_providers: 
-        PHONE_PROVIDER = request_messages.get("text")
-    if (PHONE_NUMBER != None and PHONE_PROVIDER != None):
-        send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
+    #phone_providers= {"Verizon", "Xfinity Mobile", "AT&T", "date"} 
+    #if request_messages.get("text") in phone_providers: 
+    #    PHONE_PROVIDER = request_messages.get("text")
+    #if (PHONE_NUMBER != None and PHONE_PROVIDER != None):
+    #    send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
 
     # Set query type
     query_type = "simple"
@@ -449,6 +451,18 @@ def conversation_without_data(request_body):
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():
     request_body = request.json
+
+    phone_providers= {"Verizon", "Xfinity Mobile", "AT&T", "date"}
+    messages=request_body.get("messages",[])
+    for message in messages:
+        text = message.get("text")  # Accessing the "text" key within each message dictionary
+        if contains_phone_number(text):
+            PHONE_NUMBER = text
+        if text in phone_providers:
+            PHONE_PROVIDER = text
+    if (PHONE_NUMBER != None and PHONE_PROVIDER != None):
+        send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
+
     return conversation_internal(request_body)
 
 def conversation_internal(request_body):
