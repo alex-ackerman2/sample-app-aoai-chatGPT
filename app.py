@@ -149,12 +149,11 @@ def generateFilterString(userToken):
 
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
-    print (request_messages)
 
-    if request_messages.search(r'^(?:\D*\d){9}'):
+    if request_messages[0].search(r'^(?:\D*\d){9}'):
         PHONE_NUMBER = request_messages
     phone_providers= {"Verizon", "Xfinity Mobile", "AT&T", "date"} 
-    if request_messages in phone_providers: 
+    if request_messages[0] in phone_providers: 
         PHONE_PROVIDER = request_messages
     if (PHONE_NUMBER != None and PHONE_PROVIDER != None):
         send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
