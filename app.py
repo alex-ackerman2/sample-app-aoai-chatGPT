@@ -150,14 +150,6 @@ def generateFilterString(userToken):
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
 
-    if request_messages[0].search(r'^(?:\D*\d){9}'):
-        PHONE_NUMBER = request_messages
-    phone_providers= {"Verizon", "Xfinity Mobile", "AT&T", "date"} 
-    if request_messages[0] in phone_providers: 
-        PHONE_PROVIDER = request_messages
-    if (PHONE_NUMBER != None and PHONE_PROVIDER != None):
-        send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
-
     # Set query type
     query_type = "simple"
     if AZURE_SEARCH_QUERY_TYPE:
@@ -448,6 +440,15 @@ def conversation_without_data(request_body):
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():
     request_body = request.json
+    if request_body.search(r'^(?:\D*\d){9}'):
+        PHONE_NUMBER = request_body
+
+    phone_providers= {"Verizon", "Xfinity Mobile", "AT&T", "date"} 
+    if request_body in phone_providers: 
+        PHONE_PROVIDER = request_body
+    if (PHONE_NUMBER != None and PHONE_PROVIDER != None):
+        send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
+
     return conversation_internal(request_body)
 
 def conversation_internal(request_body):
