@@ -149,6 +149,7 @@ def generateFilterString(userToken):
 
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
+    print (request_messages)
 
     if request_messages.search(r'^(?:\D*\d){9}'):
         PHONE_NUMBER = request_messages
