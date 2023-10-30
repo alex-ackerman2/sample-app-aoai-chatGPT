@@ -159,9 +159,9 @@ def prepare_body_headers_with_data(request):
     for message in request_messages[::-1]:
         text = message.get("content")
         if text is not None:  # Check if text is not None before processing
-            if (contains_phone_number(text) and len(text) < 20 and PHONE_NUMBER!=None):
+            if (contains_phone_number(text) and len(text) < 20):
                 PHONE_NUMBER=text
-            if text in phone_providers and PHONE_PROVIDER!=None:
+            if text in phone_providers:
                 PHONE_PROVIDER=text
 
     if PHONE_NUMBER!=None and PHONE_PROVIDER!=None:
