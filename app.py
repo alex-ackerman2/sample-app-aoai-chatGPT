@@ -30,8 +30,8 @@ def favicon():
 def assets(path):
     return send_from_directory("static/assets", path)
 
-PHONE_NUMBER = []
-PHONE_PROVIDER = []
+PHONE_NUMBER = None
+PHONE_PROVIDER = None
 
 # ACS Integration Settings
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE")
@@ -152,17 +152,19 @@ def generateFilterString(userToken):
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
 
+    global PHONE_NUMBER
+    global PHONE_PROVIDER
 
     phone_providers= {"Verizon", "Xfinity Mobile", "AT&T", "date"}
-    for message in request_messages:
-        text = message.get("text")
+    for message in request_messages[::-1]:
+        text = message.get("content")
         if text is not None:  # Check if text is not None before processing
-            if contains_phone_number(text):
-                PHONE_NUMBER.append(text)
-            if text in phone_providers:
-                PHONE_PROVIDER.append(text)
+            if (contains_phone_number(text) and len(text) < 20 and PHONE_NUMBER!=None):
+                PHONE_NUMBER=text
+            if text in phone_providers and PHONE_PROVIDER!=None:
+                PHONE_PROVIDER=text
 
-    if PHONE_NUMBER and PHONE_PROVIDER:
+    if PHONE_NUMBER!=None and PHONE_PROVIDER!=None:
     # Assuming send_sms_via_email function takes PHONE_NUMBERS and PHONE_PROVIDERS as arguments
         send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
 
