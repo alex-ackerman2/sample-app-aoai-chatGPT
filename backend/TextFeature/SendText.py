@@ -1,4 +1,5 @@
-import email, smtplib, ssl
+import email, smtplib, ssl, time, schedule
+from datetime import datetime
 
 def validate_number(number: str):
     num = ""
@@ -62,6 +63,27 @@ def send_sms_via_email(
     ) as email:
         email.login(sender_email, email_password)
         email.sendmail(sender_email, receiver_email, email_message)
+
+def schedule_function(number, message, provider, time_str, num_days):
+    if "AM" in time_str or "PM" in time_str or "am" in time_str or "pm" in time_str or "Am" in time_str or "Pm" in time_str:
+        dt_time=datetime.strptime(time_str, "%I:%M %p")
+        fin_time=datetime.strftime(dt_time, "%H:%M")
+    else:
+        fin_time=time_str
+
+  
+    int_num_days=int(num_days)
+    start_day=0
+    days_elapsed=0
+    schedule.every().day.at(fin_time).do(send_sms_via_email, number=number, message=message, provider=provider)
+    while days_elapsed < int_num_days:
+        schedule.run_pending()
+        time.sleep(1)
+        current_day = time.localtime().tm_mday
+        if start_day != current_day:
+            days_elapsed = days_elapsed+1
+            start_day=current_day
+
 
 
 class ProviderNotFoundException(Exception):
