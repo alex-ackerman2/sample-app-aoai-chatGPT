@@ -194,8 +194,8 @@ def prepare_body_headers_with_data(request):
     # Assuming send_sms_via_email function takes PHONE_NUMBERS and PHONE_PROVIDERS as arguments
         #send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
         #subprocess.Popen(["python", "schedule_function.py", PHONE_NUMBER, "Hello! This is a reminder to take your prescription today. For any questions, please visit our Chatbot questions at electrodestestapp.azurewebsites.net.", PHONE_PROVIDER, REMINDER_TIME,REMINDER_AMOUNT], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        thread = threading.Thread(target=schedule_function, args=(PHONE_NUMBER, "Hello! This is a reminder to take your prescription today. For any questions, please visit our Chatbot questions at electrodestestapp.azurewebsites.net.", PHONE_PROVIDER, REMINDER_TIME,REMINDER_AMOUNT))
-        thread.start()
+        #thread = threading.Thread(target=schedule_function, args=(PHONE_NUMBER, "Hello! This is a reminder to take your prescription today. For any questions, please visit our Chatbot questions at electrodestestapp.azurewebsites.net.", PHONE_PROVIDER, REMINDER_TIME,REMINDER_AMOUNT))
+        #thread.start()
         SEND_COUNTER=1
 
     # Set query type
