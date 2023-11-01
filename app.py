@@ -7,7 +7,7 @@ from azure.identity import DefaultAzureCredential
 from flask import Flask, Response, request, jsonify, send_from_directory
 from dotenv import load_dotenv
 import re
-import subprocess
+import threading
 
 from backend.auth.auth_utils import get_authenticated_user_details
 from backend.history.cosmosdbservice import CosmosConversationClient
@@ -36,6 +36,10 @@ PHONE_NUMBER = None
 PHONE_PROVIDER = None
 REMINDER_TIME = None
 REMINDER_AMOUNT = None
+PHONE_NUMBER_FOUND = False
+PHONE_PROVIDER_FOUND = False
+REMINDER_TIME_FOUND = False
+REMINDER_AMOUNT_FOUND = False
 SEND_COUNTER = 0
 
 # ACS Integration Settings
@@ -162,19 +166,27 @@ def prepare_body_headers_with_data(request):
     global REMINDER_TIME
     global REMINDER_AMOUNT
     global SEND_COUNTER
+    global PHONE_NUMBER_FOUND
+    global PHONE_PROVIDER_FOUND
+    global REMINDER_TIME_FOUND
+    global REMINDER_AMOUNT_FOUND
 
     phone_providers= {"Verizon", "Xfinity Mobile", "AT&T", "T-Mobile"}
     for message in request_messages[::-1]:
         text = message.get("content")
         if text is not None:  # Check if text is not None before processing
-            if (contains_phone_number(text) and len(text) < 20):
+            if (contains_phone_number(text) and len(text) < 20) and PHONE_NUMBER_FOUND==False:
                 PHONE_NUMBER=text
-            if text in phone_providers:
+                PHONE_NUMBER_FOUND=True
+            if text in phone_providers and PHONE_PROVIDER_FOUND==False:
                 PHONE_PROVIDER=text
-            if "AM" in text or "PM" in text or "am" in text or "pm" in text or "Am" in text or "Pm" in text or ":" in text:
+                PHONE_PROVIDER_FOUND=True
+            if "AM" in text or "PM" in text or "am" in text or "pm" in text or "Am" in text or "Pm" in text or ":" in text and REMINDER_TIME_FOUND==False:
                 REMINDER_TIME=text
-            if PHONE_NUMBER!=None and PHONE_PROVIDER!=None and REMINDER_TIME!=None and text.isdigit():
+                REMINDER_TIME_FOUND=True
+            if PHONE_NUMBER!=None and PHONE_PROVIDER!=None and REMINDER_TIME!=None and text.isdigit() and REMINDER_AMOUNT_FOUND==False:
                 REMINDER_AMOUNT=text
+                REMINDER_AMOUNT_FOUND=True
 
 
     
@@ -182,6 +194,8 @@ def prepare_body_headers_with_data(request):
     # Assuming send_sms_via_email function takes PHONE_NUMBERS and PHONE_PROVIDERS as arguments
         #send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
         #subprocess.Popen(["python", "schedule_function.py", PHONE_NUMBER, "Hello! This is a reminder to take your prescription today. For any questions, please visit our Chatbot questions at electrodestestapp.azurewebsites.net.", PHONE_PROVIDER, REMINDER_TIME,REMINDER_AMOUNT], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        thread = threading.Thread(target=schedule_function, args=(PHONE_NUMBER, "Hello! This is a reminder to take your prescription today. For any questions, please visit our Chatbot questions at electrodestestapp.azurewebsites.net.", PHONE_PROVIDER, REMINDER_TIME,REMINDER_AMOUNT))
+        thread.start()
         SEND_COUNTER=1
 
     # Set query type
