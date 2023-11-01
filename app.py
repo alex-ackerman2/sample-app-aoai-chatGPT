@@ -7,11 +7,13 @@ from azure.identity import DefaultAzureCredential
 from flask import Flask, Response, request, jsonify, send_from_directory
 from dotenv import load_dotenv
 import re
+import subprocess
 
 from backend.auth.auth_utils import get_authenticated_user_details
 from backend.history.cosmosdbservice import CosmosConversationClient
 from backend.TextFeature.SendText import send_sms_via_email
 from backend.TextFeature.ValidatePhoneNumber import contains_phone_number
+from backend.TextFeature.ValidatePhoneNumber import schedule_function
 
 load_dotenv()
 
@@ -32,6 +34,9 @@ def assets(path):
 
 PHONE_NUMBER = None
 PHONE_PROVIDER = None
+REMINDER_TIME = None
+REMINDER_AMOUNT = None
+SEND_COUNTER = 0
 
 # ACS Integration Settings
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE")
@@ -154,8 +159,11 @@ def prepare_body_headers_with_data(request):
 
     global PHONE_NUMBER
     global PHONE_PROVIDER
+    global REMINDER_TIME
+    global REMINDER_AMOUNT
+    global SEND_COUNTER
 
-    phone_providers= {"Verizon", "Xfinity Mobile", "AT&T", "date"}
+    phone_providers= {"Verizon", "Xfinity Mobile", "AT&T", "T-Mobile"}
     for message in request_messages[::-1]:
         text = message.get("content")
         if text is not None:  # Check if text is not None before processing
@@ -163,10 +171,18 @@ def prepare_body_headers_with_data(request):
                 PHONE_NUMBER=text
             if text in phone_providers:
                 PHONE_PROVIDER=text
+            if "AM" in text or "PM" in text or "am" in text or "pm" in text or "Am" in text or "Pm" in text or ":" in text:
+                REMINDER_TIME=text
+            if PHONE_NUMBER!=None and PHONE_PROVIDER!=None and REMINDER_TIME!=None and text.isdigit():
+                REMINDER_AMOUNT=text
 
-    if PHONE_NUMBER!=None and PHONE_PROVIDER!=None:
+
+    
+    if PHONE_NUMBER!=None and PHONE_PROVIDER!=None and REMINDER_TIME!=None and REMINDER_AMOUNT!=None  and SEND_COUNTER==0:
     # Assuming send_sms_via_email function takes PHONE_NUMBERS and PHONE_PROVIDERS as arguments
-        send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
+        #send_sms_via_email(PHONE_NUMBER, "Hello. This is working!", PHONE_PROVIDER)
+        subprocess.Popen(["python", "schedule_function.py", PHONE_NUMBER, "Hello! This is a reminder to take your prescription today. For any questions, please visit our Chatbot questions at electrodestestapp.azurewebsites.net.", PHONE_PROVIDER, REMINDER_TIME,REMINDER_AMOUNT], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        SEND_COUNTER=1
 
     # Set query type
     query_type = "simple"
