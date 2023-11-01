@@ -72,7 +72,7 @@ def schedule_function(number, message, provider, time_str, num_days):
         fin_time=time_str
 
   
-    int_num_days=int(num_days)
+    int_num_days=int(num_days)+1
     start_day=0
     days_elapsed=0
     schedule.every().day.at(fin_time).do(send_sms_via_email, number=number, message=message, provider=provider)
