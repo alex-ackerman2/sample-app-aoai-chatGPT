@@ -1,4 +1,4 @@
-import email, smtplib, ssl, time, schedule
+import email, smtplib, ssl, time
 from datetime import datetime
 
 def validate_number(number: str):
@@ -75,9 +75,9 @@ def schedule_function(number, message, provider, time_str, num_days):
     int_num_days=int(num_days)+1
     start_day=0
     days_elapsed=0
-    schedule.every().day.at(fin_time).do(send_sms_via_email, number=number, message=message, provider=provider)
+    #schedule.every().day.at(fin_time).do(send_sms_via_email, number=number, message=message, provider=provider)
     while days_elapsed < int_num_days:
-        schedule.run_pending()
+        #schedule.run_pending()
         time.sleep(1)
         current_day = time.localtime().tm_mday
         if start_day != current_day:
