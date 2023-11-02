@@ -72,12 +72,15 @@ def schedule_function(number, message, provider, time_str, num_days):
         fin_time=time_str
 
   
-    int_num_days=int(num_days)+1
+    int_num_days=int(num_days)
     start_day=0
     days_elapsed=0
-    #schedule.every().day.at(fin_time).do(send_sms_via_email, number=number, message=message, provider=provider)
     while days_elapsed < int_num_days:
-        #schedule.run_pending()
+        current_time = datetime.now().strftime("%H:%M")
+        if str(fin_time)==str(current_time):
+            send_sms_via_email(number, message, provider)
+            time.sleep(60)
+        
         time.sleep(1)
         current_day = time.localtime().tm_mday
         if start_day != current_day:
@@ -170,4 +173,4 @@ PROVIDERS = {
         "mms": "mypixmessages.com",
         "mms_support": True,
     },
-} 
+}
