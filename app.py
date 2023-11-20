@@ -13,7 +13,7 @@ from backend.auth.auth_utils import get_authenticated_user_details
 from backend.history.cosmosdbservice import CosmosConversationClient
 from backend.TextFeature.SendText import send_sms_via_email
 from backend.TextFeature.ValidatePhoneNumber import contains_phone_number
-from backend.TextFeature.ValidatePhoneNumber import schedule_function
+from backend.TextFeature.SendText import schedule_function
 
 load_dotenv()
 
